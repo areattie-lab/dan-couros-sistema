@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Pedido #{{ pedido.id }}{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Pedido #{{ pedido.id }}</h1>
+      <p class="subtitle">
+        <span class="badge badge-{{ pedido.status.replace(' ', '-') }}">{{ pedido.status }}</span>
+      </p>
+    </div>
+    <a class="btn" href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}">Editar</a>
+  </div>
+
+  <form class="card">
+    <fieldset>
+      <legend>Cliente</legend>
+      <p><strong>{{ pedido.cliente.nome_razao_social }}</strong> ({{ pedido.cliente.tipo }})
+        {% if pedido.unidade_pedido %} — {{ pedido.unidade_pedido }}{% endif %}</p>
+      <p>Contato: {{ pedido.contato_pedido or "—" }} · Telefone: {{ pedido.telefone_pedido or "—" }}
+         {% if pedido.celular_pedido %} · Celular: {{ pedido.celular_pedido }}{% endif %}</p>
+      {% if pedido.endereco_pedido %}<p>Endereço: {{ pedido.endereco_pedido }}</p>{% endif %}
+      {% if pedido.tipo_pedido or pedido.tipo_fiscal %}
+        <p>Tipo: {{ pedido.tipo_pedido or "—" }} · Tipo fiscal: {{ pedido.tipo_fiscal or "—" }}</p>
+      {% endif %}
+    </fieldset>
+
+    <fieldset>
+      <legend>Veículo</legend>
+      <p>{{ pedido.veiculo or "—" }} {{ pedido.modelo or "" }} {{ pedido.ano or "" }} · Chassis: {{ pedido.chassis or "—" }}</p>
+      <p>Pedido: {{ pedido.data_pedido.strftime('%d/%m/%Y') if pedido.data_pedido else "—" }} ·
+         Entrega: {{ pedido.data_entrega.strftime('%d/%m/%Y') if pedido.data_entrega else "—" }}</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Revestimento</legend>
+      <p>Cores: {{ pedido.cor_revestimento_1 or "—" }} / {{ pedido.cor_revestimento_2 or "—" }} · Cor da linha: {{ pedido.cor_linha or "—" }}</p>
+      <p>Banco: {{ pedido.banco_acabamento or "—" }} · Laterais: {{ pedido.laterais_acabamento or "—" }} · Logomarca: {{ "Sim" if pedido.logomarca else "Não" }}</p>
+      <p>Volante: {{ pedido.volante or "—" }} · Encosto: {{ pedido.encosto or "—" }} · Assento: {{ pedido.assento or "—" }}</p>
+      <p>Composição: {{ pedido.composicao or "—" }} · Apoio de braço: {{ "Sim" if pedido.apoio_braco else "Não" }}</p>
+      <p>Adicionais: {{ pedido.adicionais|join(", ") if pedido.adicionais else "—" }}</p>
+      {% if pedido.observacoes %}<p>Obs.: {{ pedido.observacoes }}</p>{% endif %}
+    </fieldset>
+
+    <fieldset>
+      <legend>Comercial</legend>
+      <p>Pagamento: {{ pedido.forma_pagamento or "—" }} —
+        <span class="{{ 'pago-sim' if pedido.pago else 'pago-nao' }}">{{ "Pago" if pedido.pago else "Em aberto" }}</span>
+      </p>
+      <p>Preço: {{ "R$ %.2f"|format(pedido.preco) if pedido.preco is not none else "—" }} · NF: {{ pedido.nf_numero or "—" }}</p>
+    </fieldset>
+  </form>
+
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="{{ url_for('listar_pedidos') }}">← Voltar</a>
+  </div>
+{% endblock %}

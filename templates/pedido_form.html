@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if pedido else "Novo" }} pedido{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1>{{ "Editar pedido #" ~ pedido.id if pedido else "Novo pedido" }}</h1>
+  </div>
+
+  {% if not clientes %}
+    <div class="empty-state">
+      Cadastre um cliente antes de criar um pedido.
+      <div style="margin-top:12px;"><a class="btn" href="{{ url_for('novo_cliente') }}">+ Novo cliente</a></div>
+    </div>
+  {% else %}
+  <form class="card" method="post">
+    <fieldset>
+      <legend>Cliente</legend>
+      <div class="grid">
+        <div>
+          <label>Empresa / Cliente</label>
+          <select name="cliente_id" id="cliente_id" required onchange="preencherCliente()">
+            <option value="">Selecione...</option>
+            {% for c in clientes %}
+              <option value="{{ c.id }}"
+                {% if pedido and pedido.cliente_id == c.id %}selected{% endif %}
+                data-telefone="{{ c.telefone }}"
+                data-celular="{{ c.celular or '' }}"
+                data-contato="{{ c.contato_nome or c.nome_razao_social }}"
+                data-unidade="{{ c.unidade or '' }}"
+                data-endereco="{{ c.endereco or '' }}">
+                {{ c.nome_razao_social }} ({{ c.tipo }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Contato (editável neste pedido)</label>
+          <input type="text" name="contato_pedido" id="contato_pedido"
+                 value="{{ pedido.contato_pedido if pedido else '' }}">
+        </div>
+        <div>
+          <label>Telefone (editável neste pedido)</label>
+          <input type="text" name="telefone_pedido" id="telefone_pedido"
+                 value="{{ pedido.telefone_pedido if pedido else '' }}">
+        </div>
+        <div>
+          <label>Celular (editável neste pedido)</label>
+          <input type="text" name="celular_pedido" id="celular_pedido"
+                 value="{{ pedido.celular_pedido if pedido else '' }}">
+        </div>
+        <div>
+          <label>Unidade (editável neste pedido)</label>
+          <input type="text" name="unidade_pedido" id="unidade_pedido"
+                 value="{{ pedido.unidade_pedido if pedido else '' }}">
+        </div>
+        <div>
+          <label>Endereço (editável neste pedido)</label>
+          <input type="text" name="endereco_pedido" id="endereco_pedido"
+                 value="{{ pedido.endereco_pedido if pedido else '' }}">
+        </div>
+      </div>
+      <p class="helper-text">Ao escolher o cliente, contato, telefone, celular, unidade e endereço são carregados automaticamente do cadastro — você pode ajustar se este pedido for diferente.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pedido</legend>
+      <div class="grid">
+        <div>
+          <label>Data do pedido</label>
+          <input type="date" name="data_pedido"
+                 value="{{ pedido.data_pedido.isoformat() if pedido and pedido.data_pedido else '' }}">
+        </div>
+        <div>
+          <label>Data de entrega</label>
+          <input type="date" name="data_entrega"
+                 value="{{ pedido.data_entrega.isoformat() if pedido and pedido.data_entrega else '' }}">
+        </div>
+        <div>
+          <label>Status</label>
+          <select name="status">
+            {% for s in status_pedido %}
+              <option value="{{ s }}" {% if pedido and pedido.status == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Tipo de pedido</label>
+          <select name="tipo_pedido">
+            <option value="">—</option>
+            {% for t in tipos_pedido %}
+              <option value="{{ t }}" {% if pedido and pedido.tipo_pedido == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Tipo fiscal</label>
+          <input type="text" name="tipo_fiscal" value="{{ pedido.tipo_fiscal if pedido else '' }}"
+                 placeholder="a confirmar">
+          <p class="helper-text">Campo livre por enquanto — precisamos confirmar as opções certas com vocês.</p>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Veículo</legend>
+      <div class="grid">
+        <div>
+          <label>Veículo</label>
+          <input type="text" name="veiculo" value="{{ pedido.veiculo if pedido else '' }}">
+        </div>
+        <div>
+          <label>Modelo</label>
+          <input type="text" name="modelo" value="{{ pedido.modelo if pedido else '' }}">
+        </div>
+        <div>
+          <label>Ano</label>
+          <input type="text" name="ano" value="{{ pedido.ano if pedido else '' }}">
+        </div>
+        <div>
+          <label>Chassis</label>
+          <input type="text" name="chassis" value="{{ pedido.chassis if pedido else '' }}">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Revestimento</legend>
+      <div class="grid">
+        <div>
+          <label>Nº cor do revestimento (1)</label>
+          <input type="text" name="cor_revestimento_1" value="{{ pedido.cor_revestimento_1 if pedido else '' }}">
+        </div>
+        <div>
+          <label>Nº cor do revestimento (2)</label>
+          <input type="text" name="cor_revestimento_2" value="{{ pedido.cor_revestimento_2 if pedido else '' }}">
+        </div>
+        <div>
+          <label>Cor da linha</label>
+          <input type="text" name="cor_linha" value="{{ pedido.cor_linha if pedido else '' }}">
+        </div>
+        <div>
+          <label>Banco</label>
+          <select name="banco_acabamento">
+            <option value="">—</option>
+            {% for opt in ["Liso", "Enrugado", "Furado"] %}
+              <option value="{{ opt }}" {% if pedido and pedido.banco_acabamento == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Laterais</label>
+          <select name="laterais_acabamento">
+            <option value="">—</option>
+            {% for opt in ["Liso", "Enrugado", "Furado"] %}
+              <option value="{{ opt }}" {% if pedido and pedido.laterais_acabamento == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Volante</label>
+          <select name="volante">
+            <option value="">—</option>
+            {% for opt in ["Liso", "Furado"] %}
+              <option value="{{ opt }}" {% if pedido and pedido.volante == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Encosto</label>
+          <select name="encosto">
+            <option value="">—</option>
+            {% for opt in ["Inteiro", "Bi-partido"] %}
+              <option value="{{ opt }}" {% if pedido and pedido.encosto == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Assento</label>
+          <select name="assento">
+            <option value="">—</option>
+            {% for opt in ["Inteiro", "Bi-partido"] %}
+              <option value="{{ opt }}" {% if pedido and pedido.assento == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Composição</label>
+          <select name="composicao">
+            <option value="">—</option>
+            {% for opt in composicoes %}
+              <option value="{{ opt }}" {% if pedido and pedido.composicao == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label>Adicionais (o que está incluso neste pedido)</label>
+        <div class="grid">
+          {% for opt in adicionais_opcoes %}
+            <div class="checkbox-line">
+              <input type="checkbox" id="adicional_{{ loop.index }}" name="adicionais" value="{{ opt }}"
+                     {% if pedido and pedido.adicionais and opt in pedido.adicionais %}checked{% endif %}>
+              <label for="adicional_{{ loop.index }}" style="margin:0;">{{ opt }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="checkbox-line" style="margin-top:12px;">
+        <input type="checkbox" id="logomarca" name="logomarca" {% if pedido and pedido.logomarca %}checked{% endif %}>
+        <label for="logomarca" style="margin:0;">Logomarca (bordada/aplicada no revestimento)</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="apoio_braco" name="apoio_braco" {% if pedido and pedido.apoio_braco %}checked{% endif %}>
+        <label for="apoio_braco" style="margin:0;">Adaptação apoia braço (01 mecanismo)</label>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Observações</label>
+        <textarea name="observacoes">{{ pedido.observacoes if pedido else '' }}</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Comercial</legend>
+      <div class="grid">
+        <div>
+          <label>Forma de pagamento</label>
+          <select name="forma_pagamento">
+            <option value="">—</option>
+            {% for opt in formas_pagamento %}
+              <option value="{{ opt }}" {% if pedido and pedido.forma_pagamento == opt %}selected{% endif %}>{{ opt }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Preço (R$)</label>
+          <input type="text" name="preco" value="{{ pedido.preco if pedido and pedido.preco is not none else '' }}">
+        </div>
+        <div>
+          <label>Nº da NF</label>
+          <input type="text" name="nf_numero" value="{{ pedido.nf_numero if pedido else '' }}">
+        </div>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="pago" name="pago" {% if pedido and pedido.pago %}checked{% endif %}>
+        <label for="pago" style="margin:0;">Pagamento confirmado</label>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Salvar pedido</button>
+      <a class="btn btn-secondary" href="{{ url_for('listar_pedidos') }}">Cancelar</a>
+    </div>
+  </form>
+  {% endif %}
+
+  <script>
+    async function preencherCliente() {
+      const select = document.getElementById('cliente_id');
+      const option = select.options[select.selectedIndex];
+      if (!option || !option.value) return;
+
+      // Só sobrescreve se os campos ainda estiverem vazios (evita apagar edição manual ao reabrir pedido existente)
+      const telefoneField = document.getElementById('telefone_pedido');
+      const contatoField = document.getElementById('contato_pedido');
+      const celularField = document.getElementById('celular_pedido');
+      const unidadeField = document.getElementById('unidade_pedido');
+      const enderecoField = document.getElementById('endereco_pedido');
+      const isNovoPedido = {{ 'true' if not pedido else 'false' }};
+
+      if (isNovoPedido || (!telefoneField.value && !contatoField.value)) {
+        telefoneField.value = option.getAttribute('data-telefone') || '';
+        contatoField.value = option.getAttribute('data-contato') || '';
+        celularField.value = option.getAttribute('data-celular') || '';
+        unidadeField.value = option.getAttribute('data-unidade') || '';
+        enderecoField.value = option.getAttribute('data-endereco') || '';
+      }
+    }
+  </script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Pedidos{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Pedidos</h1>
+      <p class="subtitle">Ordem de Serviço — dados do cliente carregados automaticamente do cadastro.</p>
+    </div>
+    <a class="btn" href="{{ url_for('novo_pedido') }}">+ Novo pedido</a>
+  </div>
+
+  <div class="tabs">
+    <a class="tab {{ 'active' if aba == 'ativos' }}" href="{{ url_for('listar_pedidos', aba='ativos') }}">Ativos</a>
+    <a class="tab {{ 'active' if aba == 'finalizados' }}" href="{{ url_for('listar_pedidos', aba='finalizados') }}">Finalizados / Cancelados</a>
+    <a class="tab {{ 'active' if aba == 'todos' }}" href="{{ url_for('listar_pedidos', aba='todos') }}">Todos</a>
+  </div>
+
+  {% if pedidos %}
+  <table>
+    <thead>
+      <tr>
+        <th>Nº</th>
+        <th>Cliente</th>
+        <th>Veículo</th>
+        <th>Data pedido</th>
+        <th>Entrega</th>
+        <th>Status</th>
+        <th>Pagamento</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pedidos %}
+      <tr>
+        <td><a class="row-link" href="{{ url_for('ver_pedido', pedido_id=p.id) }}">#{{ p.id }}</a></td>
+        <td>{{ p.cliente.nome_razao_social }}</td>
+        <td>{{ p.veiculo or "—" }} {{ p.modelo or "" }}</td>
+        <td>{{ p.data_pedido.strftime('%d/%m/%Y') if p.data_pedido else "—" }}</td>
+        <td>{{ p.data_entrega.strftime('%d/%m/%Y') if p.data_entrega else "—" }}</td>
+        <td><span class="badge badge-{{ p.status.replace(' ', '-') }}">{{ p.status }}</span></td>
+        <td>
+          {{ p.forma_pagamento or "—" }}
+          {% if p.forma_pagamento %}
+            — <span class="{{ 'pago-sim' if p.pago else 'pago-nao' }}">{{ "Pago" if p.pago else "Em aberto" }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <div class="empty-state">Nenhum pedido nessa visão ainda.</div>
+  {% endif %}
+{% endblock %}

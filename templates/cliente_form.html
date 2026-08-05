@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if cliente else "Novo" }} cliente{% endblock %}
+{% block content %}
+  {% set f = form or cliente %}
+  <div class="page-header">
+    <h1>{{ "Editar cliente" if cliente else "Novo cliente" }}</h1>
+  </div>
+
+  <form class="card" method="post">
+    <fieldset>
+      <legend>Dados básicos (obrigatórios)</legend>
+      <div class="grid">
+        <div>
+          <label>Tipo de cliente</label>
+          <select name="tipo" required>
+            {% for t in tipos_cliente %}
+              <option value="{{ t }}" {% if f and f.tipo == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Nome / Razão social</label>
+          <input type="text" name="nome_razao_social" required
+                 value="{{ f.nome_razao_social if f else '' }}">
+        </div>
+        <div>
+          <label>CPF/CNPJ</label>
+          <input type="text" name="cpf_cnpj" required
+                 value="{{ f.cpf_cnpj if f else '' }}">
+        </div>
+        <div>
+          <label>Telefone</label>
+          <input type="text" name="telefone" required
+                 value="{{ f.telefone if f else '' }}">
+        </div>
+        <div>
+          <label>Celular</label>
+          <input type="text" name="celular" value="{{ f.celular if f else '' }}">
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" required
+                 value="{{ f.email if f else '' }}">
+        </div>
+        <div>
+          <label>Unidade / Filial</label>
+          <input type="text" name="unidade" value="{{ f.unidade if f else '' }}"
+                 placeholder="ex: Loja Centro">
+        </div>
+      </div>
+
+      {% set is_pj = f and f.is_pessoa_juridica %}
+      <div class="checkbox-line">
+        <input type="checkbox" id="is_pessoa_juridica" name="is_pessoa_juridica"
+               {% if is_pj %}checked{% endif %}
+               onchange="document.getElementById('contato-wrap').style.display = this.checked ? 'block' : 'none'">
+        <label for="is_pessoa_juridica" style="margin:0;">É pessoa jurídica (CNPJ) — exige contato</label>
+      </div>
+
+      <div id="contato-wrap" style="margin-top:12px; {% if not is_pj %}display:none;{% endif %}">
+        <label>Nome do contato</label>
+        <input type="text" name="contato_nome" value="{{ f.contato_nome if f else '' }}">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Complementar</legend>
+      <label>Endereço</label>
+      <input type="text" name="endereco" value="{{ f.endereco if f else '' }}">
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Salvar</button>
+      <a class="btn btn-secondary" href="{{ url_for('listar_clientes') }}">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}
