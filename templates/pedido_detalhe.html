@@ -8,7 +8,12 @@
         <span class="badge badge-{{ pedido.status.replace(' ', '-') }}">{{ pedido.status }}</span>
       </p>
     </div>
-    <a class="btn" href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}">Editar</a>
+    <div style="display:flex;gap:8px;">
+      <a class="btn btn-secondary" href="{{ url_for('editar_producao', pedido_id=pedido.id) }}">
+        {{ "Ver produção" if pedido.producao else "Enviar para produção" }}
+      </a>
+      <a class="btn" href="{{ url_for('editar_pedido', pedido_id=pedido.id) }}">Editar</a>
+    </div>
   </div>
 
   <form class="card">
@@ -48,6 +53,17 @@
       </p>
       <p>Preço: {{ "R$ %.2f"|format(pedido.preco) if pedido.preco is not none else "—" }} · NF: {{ pedido.nf_numero or "—" }}</p>
     </fieldset>
+
+    {% if pedido.producao %}
+    <fieldset>
+      <legend>Produção</legend>
+      <p>Status: <span class="badge badge-{{ pedido.producao.status_producao }}">{{ pedido.producao.status_producao }}</span>
+         · Prioridade: {{ pedido.producao.prioridade if pedido.producao.prioridade is not none else "—" }}
+         · Responsável: {{ pedido.producao.fornecedor_responsavel or "—" }}</p>
+      <p>Entrada: {{ pedido.producao.data_entrada.strftime('%d/%m/%Y') if pedido.producao.data_entrada else "—" }} ·
+         Saída: {{ pedido.producao.data_saida.strftime('%d/%m/%Y') if pedido.producao.data_saida else "—" }}</p>
+    </fieldset>
+    {% endif %}
   </form>
 
   <div class="form-actions">

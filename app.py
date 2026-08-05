@@ -7,6 +7,7 @@ from models import (
     db,
     Cliente,
     Pedido,
+    Producao,
     TIPOS_CLIENTE,
     FORMAS_PAGAMENTO,
     COMPOSICOES,
@@ -14,6 +15,8 @@ from models import (
     STATUS_FORA_CONSULTA_PRINCIPAL,
     ADICIONAIS_OPCOES,
     TIPOS_PEDIDO,
+    STATUS_PRODUCAO,
+    ETAPAS_COSTURA,
 )
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -49,6 +52,8 @@ def inject_globals():
         status_pedido=STATUS_PEDIDO,
         adicionais_opcoes=ADICIONAIS_OPCOES,
         tipos_pedido=TIPOS_PEDIDO,
+        status_producao=STATUS_PRODUCAO,
+        etapas_costura=ETAPAS_COSTURA,
     )
 
 
@@ -256,6 +261,58 @@ def _preencher_pedido(pedido, form):
 def ver_pedido(pedido_id):
     pedido = Pedido.query.get_or_404(pedido_id)
     return render_template("pedido_detalhe.html", pedido=pedido)
+
+
+# ---------- Produção (2ª linha do tempo) ----------
+
+@app.route("/producao")
+def listar_producao():
+    # Chão de fábrica: só pedidos que já têm registro de produção e não terminaram.
+    registros = (
+        Producao.query.join(Pedido)
+        .filter(Producao.status_producao != "OK")
+        .order_by(Producao.prioridade.asc().nullslast(), Producao.data_entrada.asc())
+        .all()
+    )
+    return render_template("producao_list.html", registros=registros)
+
+
+@app.route("/pedidos/<int:pedido_id>/producao", methods=["GET", "POST"])
+def editar_producao(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    producao = pedido.producao or Producao(pedido_id=pedido.id)
+
+    if request.method == "POST":
+        producao.prioridade = int(request.form["prioridade"]) if request.form.get("prioridade") else None
+        producao.fornecedor_responsavel = request.form.get("fornecedor_responsavel", "").strip() or None
+
+        producao.data_entrada = parse_date(request.form.get("data_entrada"))
+        producao.data_saida = parse_date(request.form.get("data_saida"))
+        producao.status_producao = request.form.get("status_producao") or "Pendente"
+
+        producao.etapa_costura = request.form.get("etapa_costura") or None
+        producao.montagem_feita = bool(request.form.get("montagem_feita"))
+        producao.laterais_feita = bool(request.form.get("laterais_feita"))
+        producao.ruga = bool(request.form.get("ruga"))
+
+        for campo in ("metros_couro", "metros_sintetico", "metros_espuma"):
+            valor = request.form.get(campo, "").replace(",", ".").strip()
+            setattr(producao, campo, float(valor) if valor else None)
+
+        producao.data_desmontagem = parse_date(request.form.get("data_desmontagem"))
+        producao.motorista_desmontagem = request.form.get("motorista_desmontagem", "").strip() or None
+        producao.data_montagem = parse_date(request.form.get("data_montagem"))
+        producao.motorista_montagem = request.form.get("motorista_montagem", "").strip() or None
+
+        producao.observacoes = request.form.get("observacoes", "").strip() or None
+
+        if producao.id is None:
+            db.session.add(producao)
+        db.session.commit()
+        flash(f"Produção do pedido #{pedido.id} salva.", "success")
+        return redirect(url_for("ver_pedido", pedido_id=pedido.id))
+
+    return render_template("producao_form.html", pedido=pedido, producao=producao)
 
 
 with app.app_context():

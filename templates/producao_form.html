@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Produção do pedido #{{ pedido.id }}{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1>Produção — Pedido #{{ pedido.id }}</h1>
+  </div>
+  <p class="subtitle">{{ pedido.cliente.nome_razao_social }} · {{ pedido.veiculo or "—" }} {{ pedido.modelo or "" }}</p>
+
+  <form class="card" method="post">
+    <fieldset>
+      <legend>Fila de produção</legend>
+      <div class="grid">
+        <div>
+          <label>Prioridade (ordem de execução)</label>
+          <input type="number" name="prioridade" min="1"
+                 value="{{ producao.prioridade if producao.prioridade is not none else '' }}">
+        </div>
+        <div>
+          <label>Responsável (costureira/terceirizado)</label>
+          <input type="text" name="fornecedor_responsavel" value="{{ producao.fornecedor_responsavel or '' }}">
+        </div>
+        <div>
+          <label>Status da produção</label>
+          <select name="status_producao">
+            {% for s in status_producao %}
+              <option value="{{ s }}" {% if producao.status_producao == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label>Data de entrada</label>
+          <input type="date" name="data_entrada"
+                 value="{{ producao.data_entrada.isoformat() if producao.data_entrada else '' }}">
+        </div>
+        <div>
+          <label>Data de saída</label>
+          <input type="date" name="data_saida"
+                 value="{{ producao.data_saida.isoformat() if producao.data_saida else '' }}">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Costura e montagem</legend>
+      <div class="grid">
+        <div>
+          <label>Etapa da costura</label>
+          <select name="etapa_costura">
+            <option value="">—</option>
+            {% for e in etapas_costura %}
+              <option value="{{ e }}" {% if producao.etapa_costura == e %}selected{% endif %}>{{ e }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="montagem_feita" name="montagem_feita" {% if producao.montagem_feita %}checked{% endif %}>
+        <label for="montagem_feita" style="margin:0;">Montagem concluída</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="laterais_feita" name="laterais_feita" {% if producao.laterais_feita %}checked{% endif %}>
+        <label for="laterais_feita" style="margin:0;">Laterais concluídas</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="ruga" name="ruga" {% if producao.ruga %}checked{% endif %}>
+        <label for="ruga" style="margin:0;">Problema de ruga / acabamento</label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Metros utilizados (preenchido pela produção ao final)</legend>
+      <div class="grid">
+        <div>
+          <label>Couro (m)</label>
+          <input type="text" name="metros_couro" value="{{ producao.metros_couro if producao.metros_couro is not none else '' }}">
+        </div>
+        <div>
+          <label>Sintético (m)</label>
+          <input type="text" name="metros_sintetico" value="{{ producao.metros_sintetico if producao.metros_sintetico is not none else '' }}">
+        </div>
+        <div>
+          <label>Espuma (m)</label>
+          <input type="text" name="metros_espuma" value="{{ producao.metros_espuma if producao.metros_espuma is not none else '' }}">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Retirada e entrega do carro</legend>
+      <div class="grid">
+        <div>
+          <label>Data desmontagem (retirada)</label>
+          <input type="date" name="data_desmontagem"
+                 value="{{ producao.data_desmontagem.isoformat() if producao.data_desmontagem else '' }}">
+        </div>
+        <div>
+          <label>Motorista (retirada)</label>
+          <input type="text" name="motorista_desmontagem" value="{{ producao.motorista_desmontagem or '' }}">
+        </div>
+        <div>
+          <label>Data montagem (entrega)</label>
+          <input type="date" name="data_montagem"
+                 value="{{ producao.data_montagem.isoformat() if producao.data_montagem else '' }}">
+        </div>
+        <div>
+          <label>Motorista (entrega)</label>
+          <input type="text" name="motorista_montagem" value="{{ producao.motorista_montagem or '' }}">
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Observações</label>
+        <textarea name="observacoes">{{ producao.observacoes or '' }}</textarea>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button class="btn" type="submit">Salvar produção</button>
+      <a class="btn btn-secondary" href="{{ url_for('ver_pedido', pedido_id=pedido.id) }}">Voltar ao pedido</a>
+    </div>
+  </form>
+{% endblock %}

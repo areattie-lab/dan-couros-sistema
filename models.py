@@ -41,6 +41,14 @@ STATUS_PEDIDO = [
 # Status que saem da consulta principal (ficam numa aba separada)
 STATUS_FORA_CONSULTA_PRINCIPAL = ["Finalizado", "Cancelado"]
 
+# Status da produção (2ª linha do tempo, dentro do pedido).
+# Nomes vistos na planilha "Controle de Produção": OK (pronto) / DISP (em aberto/pendente).
+# Vale confirmar com o Victor se esses são realmente os únicos dois estados.
+STATUS_PRODUCAO = ["Pendente", "DISP", "OK"]
+
+# Etapas de costura vistas na planilha (CAPA / MAQ) — a confirmar o significado exato com o Victor.
+ETAPAS_COSTURA = ["Não iniciado", "Capa", "Máquina", "Concluído"]
+
 
 class Cliente(db.Model):
     __tablename__ = "clientes"
@@ -78,7 +86,7 @@ class Pedido(db.Model):
     endereco_pedido = db.Column(db.String(300))
 
     tipo_pedido = db.Column(db.String(20))  # Diversos / Revenda
-    tipo_fiscal = db.Column(db.String(50))  # a confirmar com Welington/Dan Couros
+    tipo_fiscal = db.Column(db.String(50))  # a confirmar com Victor (Dan Couros)
 
     data_pedido = db.Column(db.Date, default=datetime.utcnow)
     data_entrega = db.Column(db.Date)
@@ -116,5 +124,48 @@ class Pedido(db.Model):
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
     atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    producao = db.relationship("Producao", backref="pedido", uselist=False, lazy=True)
+
     def __repr__(self):
         return f"<Pedido #{self.id}>"
+
+
+class Producao(db.Model):
+    """Segunda linha do tempo: controle de produção de um pedido.
+    Um pedido pode levar mais de um dia até a produção terminar."""
+
+    __tablename__ = "producoes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    pedido_id = db.Column(db.Integer, db.ForeignKey("pedidos.id"), nullable=False, unique=True)
+
+    prioridade = db.Column(db.Integer)  # ordem de execução no chão de fábrica (1 = primeiro)
+    fornecedor_responsavel = db.Column(db.String(120))  # quem está costurando/montando (ex: terceirizado)
+
+    data_entrada = db.Column(db.Date)
+    data_saida = db.Column(db.Date)
+    status_producao = db.Column(db.String(20), default="Pendente")  # uma das STATUS_PRODUCAO
+
+    etapa_costura = db.Column(db.String(20))  # uma das ETAPAS_COSTURA
+    montagem_feita = db.Column(db.Boolean, default=False)
+    laterais_feita = db.Column(db.Boolean, default=False)
+    ruga = db.Column(db.Boolean, default=False)  # sinaliza problema de acabamento (enrugamento)
+
+    # Metros utilizados — devolvidos pela produção ao final (anotações de rodapé na OS original)
+    metros_couro = db.Column(db.Numeric(6, 2))
+    metros_sintetico = db.Column(db.Numeric(6, 2))
+    metros_espuma = db.Column(db.Numeric(6, 2))
+
+    # Desmontagem / Montagem no cliente (retirada e entrega do carro)
+    data_desmontagem = db.Column(db.Date)
+    motorista_desmontagem = db.Column(db.String(120))
+    data_montagem = db.Column(db.Date)
+    motorista_montagem = db.Column(db.String(120))
+
+    observacoes = db.Column(db.Text)
+
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Producao pedido={self.pedido_id}>"

@@ -133,6 +133,9 @@ a.row-link:hover { text-decoration: underline; }
 .badge-Montagem { background: #7d5c2e; }
 .badge-Finalizado { background: var(--verde); }
 .badge-Cancelado { background: var(--vermelho); }
+.badge-Pendente { background: #999; }
+.badge-DISP { background: #b0812e; }
+.badge-OK { background: var(--verde); }
 
 .pago-sim { color: var(--verde); font-weight: 700; }
 .pago-nao { color: var(--amarelo); font-weight: 700; }

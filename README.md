@@ -10,10 +10,11 @@ Protótipo funcional cobrindo o núcleo do sistema descrito no documento: **Cada
 - Ao escolher o cliente no pedido, contato, telefone, celular, unidade e endereço vêm preenchidos sozinhos — mas continuam editáveis nesse pedido específico (o carro pode ser retirado num endereço diferente do cadastro, por exemplo).
 - Adicionais do pedido (Assoalho, 100% Couro, Misto, Sintético, Volante, Teto) como seleção múltipla, e Logomarca como Sim/Não — refletindo o formulário mais recente.
 - Lista de pedidos com abas: **Ativos** (visão inicial), **Finalizados/Cancelados**, **Todos**.
+- **Controle de Produção** (2ª linha do tempo, dentro do pedido): tela "Produção" no menu mostra a fila ordenada por prioridade, só com pedidos que ainda não terminaram. De cada pedido dá pra abrir o registro de produção com prioridade, responsável (costureira/terceirizado), datas de entrada/saída, etapa de costura, montagem, laterais, sinalização de ruga, metros de couro/sintético/espuma usados, e datas/motoristas de retirada e entrega do carro no cliente.
 
 ## Fora do escopo desta v1 (próximos passos)
 
-Ainda não implementados, para não travar a entrega do núcleo: Controle de Produção (2ª linha do tempo), Checklist de retirada/montagem, Recibo, Certificado, e os relatórios (forma de pagamento por período; comissionamento por cliente/período). O modelo de dados já foi pensado para esses módulos se conectarem ao Pedido sem duplicar cadastro.
+Ainda não implementados: Checklist de retirada/montagem (o documento assinado pelo cliente), Recibo, Certificado, e os relatórios (forma de pagamento por período; comissionamento por cliente/período). O modelo de dados já foi pensado para esses módulos se conectarem ao Pedido sem duplicar cadastro.
 
 ## Publicar na nuvem sem usar terminal (caminho recomendado)
 
@@ -53,7 +54,7 @@ python3 app.py
 
 Abra `http://localhost:5000`. Um banco SQLite (`dan_couros.db`) é criado automaticamente na primeira execução — nenhuma configuração extra é necessária para testar.
 
-## Decisões que tomei e que valem alinhar com o Welington / Dan Couros
+## Decisões que tomei e que valem alinhar com o Victor (Dan Couros)
 
 - **Status do pedido**: usei `Aberto → Em Produção → Desmontagem → Montagem → Finalizado`, com `Cancelado` como estado terminal à parte, e "Pago" como marcador independente (um pedido pode estar Finalizado e ainda não pago). O rascunho do quadro branco tinha mais anotações soltas (Em Aberto, Produção, Pago com símbolos riscados) que não deu para decifrar com certeza — vale confirmar esse fluxo com eles antes de avançar para o Controle de Produção.
 - **CPF/CNPJ**: pedi para marcar manualmente "é pessoa jurídica" em vez de validar o formato do documento, para não travar o cadastro por um CPF/CNPJ digitado fora do padrão.
@@ -62,6 +63,9 @@ Abra `http://localhost:5000`. Um banco SQLite (`dan_couros.db`) é criado automa
 - **Adicionais vs. Composição**: o formulário antigo tinha "Composição" (100% Couro 1a. Qualidade / 70-30 / 50-50 / 100% Courvin Comum) e o material novo mostra uma lista diferente de checkboxes (Assoalho, 100% Couro, Misto, Sintético, Volante, Teto). Mantive os dois campos por enquanto — parecem cobrir coisas um pouco diferentes (composição = mix de material no banco; adicionais = quais partes do carro entram no serviço). Vale confirmar se "Composição" ainda é usada ou se foi substituída pelos "Adicionais".
 - **Logomarca**: mudou de Bordado/Prensado/Nada (documento original) para Sim/Não (mockup mais recente) — segui a versão mais recente.
 - **Unidade**: no mockup aparece como campo de texto solto ao lado de "Cliente" (ex: nome da filial/loja), separado do "Tipo" (Concessionária/Agência/Particular/Loja). Adicionei como campo livre no cadastro do cliente, editável também por pedido.
+- **Status de produção (OK/DISP)**: na planilha "Controle de Produção" a coluna STAT só tinha esses dois valores. Assumi "OK" = pronto e "DISP" = em aberto/pendente, e adicionei "Pendente" como estado inicial antes de qualquer um dos dois. Vale confirmar com o Victor se é isso mesmo ou se há mais estados.
+- **Etapas de costura (CAPA/MAQ)**: também vistas na planilha de produção, sem explicação do que significam exatamente. Coloquei como um select com "Capa", "Máquina" e "Concluído" — é um chute educado, precisa validar com quem realmente costura.
+- **Produção como 1 registro por pedido**: como o documento menciona que a produção pode levar mais de um dia, modelei como um único registro de produção por pedido (com data de entrada e saída), em vez de múltiplas linhas por dia. Se na prática cada pedido passa por várias etapas em dias diferentes com equipes diferentes, pode ser melhor um histórico de eventos em vez de um registro só — outro ponto para alinhar.
 
 ## Estrutura do projeto
 
