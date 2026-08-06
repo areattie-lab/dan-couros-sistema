@@ -304,6 +304,17 @@ def editar_producao(pedido_id):
         producao.data_montagem = parse_date(request.form.get("data_montagem"))
         producao.motorista_montagem = request.form.get("motorista_montagem", "").strip() or None
 
+        producao.checklist_pecas_plasticas_desmontagem = bool(request.form.get("checklist_pecas_plasticas_desmontagem"))
+        producao.checklist_parte_eletrica_desmontagem = bool(request.form.get("checklist_parte_eletrica_desmontagem"))
+        producao.checklist_banco_laterais_desmontagem = bool(request.form.get("checklist_banco_laterais_desmontagem"))
+        producao.checklist_de_acordo_desmontagem = request.form.get("checklist_de_acordo_desmontagem", "").strip() or None
+
+        producao.checklist_pecas_plasticas_montagem = bool(request.form.get("checklist_pecas_plasticas_montagem"))
+        producao.checklist_parte_eletrica_montagem = bool(request.form.get("checklist_parte_eletrica_montagem"))
+        producao.checklist_banco_laterais_montagem = bool(request.form.get("checklist_banco_laterais_montagem"))
+        producao.checklist_de_acordo_montagem = request.form.get("checklist_de_acordo_montagem", "").strip() or None
+        producao.checklist_observacoes = request.form.get("checklist_observacoes", "").strip() or None
+
         producao.observacoes = request.form.get("observacoes", "").strip() or None
 
         if producao.id is None:
@@ -313,6 +324,13 @@ def editar_producao(pedido_id):
         return redirect(url_for("ver_pedido", pedido_id=pedido.id))
 
     return render_template("producao_form.html", pedido=pedido, producao=producao)
+
+
+@app.route("/pedidos/<int:pedido_id>/checklist")
+def imprimir_checklist(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    producao = pedido.producao or Producao(pedido_id=pedido.id)
+    return render_template("checklist_print.html", pedido=pedido, producao=producao)
 
 
 with app.app_context():

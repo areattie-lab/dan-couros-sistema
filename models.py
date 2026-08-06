@@ -162,6 +162,19 @@ class Producao(db.Model):
     data_montagem = db.Column(db.Date)
     motorista_montagem = db.Column(db.String(120))
 
+    # Checklist de conferência (talão assinado pelo cliente na retirada e na entrega)
+    checklist_pecas_plasticas_desmontagem = db.Column(db.Boolean, default=False)
+    checklist_parte_eletrica_desmontagem = db.Column(db.Boolean, default=False)
+    checklist_banco_laterais_desmontagem = db.Column(db.Boolean, default=False)
+    checklist_de_acordo_desmontagem = db.Column(db.String(120))  # nome de quem assinou na retirada
+
+    checklist_pecas_plasticas_montagem = db.Column(db.Boolean, default=False)
+    checklist_parte_eletrica_montagem = db.Column(db.Boolean, default=False)
+    checklist_banco_laterais_montagem = db.Column(db.Boolean, default=False)
+    checklist_de_acordo_montagem = db.Column(db.String(120))  # nome de quem assinou na entrega
+
+    checklist_observacoes = db.Column(db.Text)
+
     observacoes = db.Column(db.Text)
 
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)

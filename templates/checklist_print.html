@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Checklist — Pedido #{{ pedido.id }}</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #1a1a1a;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    .no-print { text-align: right; margin-bottom: 16px; }
+    .no-print button {
+      background: #6b3f22;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    header h1 { font-size: 1.3rem; margin: 0; }
+    header p { margin: 2px 0 0; font-size: 0.85rem; }
+    .numero { font-size: 1.4rem; font-weight: bold; color: #b3261e; }
+    .dados-veiculo p { margin: 4px 0; font-size: 0.95rem; }
+    .dados-veiculo b { display: inline-block; min-width: 110px; }
+    table.conferencia {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      border: 1px solid #1a1a1a;
+    }
+    table.conferencia th {
+      border: 1px solid #1a1a1a;
+      padding: 8px;
+      background: #f0f0f0;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    table.conferencia td {
+      border: 1px solid #1a1a1a;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      vertical-align: top;
+    }
+    .marca { display: inline-block; width: 14px; height: 14px; border: 1px solid #1a1a1a; margin-right: 6px; position: relative; top: 2px; }
+    .marca.conferido::after { content: "X"; position: absolute; left: 2px; top: -3px; font-weight: bold; }
+    .linha { border-bottom: 1px solid #1a1a1a; display: inline-block; min-width: 160px; }
+    .declaracao { margin-top: 24px; font-size: 0.9rem; text-align: center; font-weight: bold; }
+    .assinatura { margin-top: 40px; display: flex; justify-content: space-between; }
+    .assinatura div { text-align: center; width: 45%; }
+    .assinatura .linha-assinatura { border-bottom: 1px solid #1a1a1a; margin-bottom: 4px; height: 30px; }
+    @media print {
+      .no-print { display: none; }
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print"><button onclick="window.print()">Imprimir</button></div>
+
+  <header>
+    <div>
+      <h1>DAN COUROS</h1>
+      <p>Revestimento em Couro e Courvin para Automóveis</p>
+      <p>Check List de Desmontagem e Montagem</p>
+    </div>
+    <div class="numero">#{{ pedido.id }}</div>
+  </header>
+
+  <div class="dados-veiculo">
+    <p><b>Veículo / Modelo:</b> {{ pedido.veiculo or "" }} {{ pedido.modelo or "" }} {{ pedido.ano or "" }}</p>
+    <p><b>Chassis:</b> {{ pedido.chassis or "" }}</p>
+    <p><b>Cliente:</b> {{ pedido.cliente.nome_razao_social }}{% if pedido.unidade_pedido %} — {{ pedido.unidade_pedido }}{% endif %}</p>
+    <p><b>Telefone:</b> {{ pedido.telefone_pedido or pedido.cliente.telefone }}</p>
+    <p><b>Endereço:</b> {{ pedido.endereco_pedido or pedido.cliente.endereco or "" }}</p>
+  </div>
+
+  <table class="conferencia">
+    <thead>
+      <tr>
+        <th style="width:50%;">Retirada (desmontagem)</th>
+        <th style="width:50%;">Entrega (montagem)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Desmontado por: <span class="linha">{{ producao.motorista_desmontagem or "" }}</span></td>
+        <td>Montado por: <span class="linha">{{ producao.motorista_montagem or "" }}</span></td>
+      </tr>
+      <tr>
+        <td>Desmontado em: <span class="linha">{{ producao.data_desmontagem.strftime('%d/%m/%Y') if producao.data_desmontagem else "" }}</span></td>
+        <td>Montado em: <span class="linha">{{ producao.data_montagem.strftime('%d/%m/%Y') if producao.data_montagem else "" }}</span></td>
+      </tr>
+      <tr>
+        <td><span class="marca {{ 'conferido' if producao.checklist_pecas_plasticas_desmontagem }}"></span>Peças plásticas originais</td>
+        <td><span class="marca {{ 'conferido' if producao.checklist_pecas_plasticas_montagem }}"></span>Peças plásticas originais</td>
+      </tr>
+      <tr>
+        <td><span class="marca {{ 'conferido' if producao.checklist_parte_eletrica_desmontagem }}"></span>Parte elétrica das laterais</td>
+        <td><span class="marca {{ 'conferido' if producao.checklist_parte_eletrica_montagem }}"></span>Parte elétrica das laterais</td>
+      </tr>
+      <tr>
+        <td><span class="marca {{ 'conferido' if producao.checklist_banco_laterais_desmontagem }}"></span>Banco / laterais</td>
+        <td><span class="marca {{ 'conferido' if producao.checklist_banco_laterais_montagem }}"></span>Banco / laterais</td>
+      </tr>
+      <tr>
+        <td>De acordo: <span class="linha">{{ producao.checklist_de_acordo_desmontagem or "" }}</span></td>
+        <td>De acordo: <span class="linha">{{ producao.checklist_de_acordo_montagem or "" }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% if producao.checklist_observacoes %}
+    <p style="margin-top:14px;font-size:0.9rem;"><b>Obs.:</b> {{ producao.checklist_observacoes }}</p>
+  {% else %}
+    <p style="margin-top:14px;font-size:0.9rem;"><b>Obs.:</b> ______________________________________________</p>
+  {% endif %}
+
+  <p class="declaracao">O VEÍCULO ACIMA DESCRITO ESTÁ DE ACORDO, NÃO TENDO NADA A RECLAMAR.</p>
+
+  <div class="assinatura">
+    <div>
+      <div class="linha-assinatura"></div>
+      Assinatura do cliente (retirada)
+    </div>
+    <div>
+      <div class="linha-assinatura"></div>
+      Assinatura do cliente (entrega)
+    </div>
+  </div>
+</body>
+</html>

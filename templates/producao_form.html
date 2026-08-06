@@ -113,8 +113,55 @@
       </div>
     </fieldset>
 
+    <fieldset>
+      <legend>Checklist de conferência (talão assinado pelo cliente)</legend>
+      <p class="helper-text">Preencha aqui se quiser registrar digitalmente também — não é obrigatório para imprimir o talão.</p>
+
+      <p style="font-size:12px;font-weight:600;color:var(--marrom-escuro);margin:14px 0 6px;">Na retirada (desmontagem)</p>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_pecas_plasticas_desmontagem" name="checklist_pecas_plasticas_desmontagem" {% if producao.checklist_pecas_plasticas_desmontagem %}checked{% endif %}>
+        <label for="checklist_pecas_plasticas_desmontagem" style="margin:0;">Peças plásticas originais conferidas</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_parte_eletrica_desmontagem" name="checklist_parte_eletrica_desmontagem" {% if producao.checklist_parte_eletrica_desmontagem %}checked{% endif %}>
+        <label for="checklist_parte_eletrica_desmontagem" style="margin:0;">Parte elétrica das laterais conferida</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_banco_laterais_desmontagem" name="checklist_banco_laterais_desmontagem" {% if producao.checklist_banco_laterais_desmontagem %}checked{% endif %}>
+        <label for="checklist_banco_laterais_desmontagem" style="margin:0;">Banco/laterais conferidos</label>
+      </div>
+      <div style="margin-top:8px;">
+        <label>De acordo (nome de quem assinou na retirada)</label>
+        <input type="text" name="checklist_de_acordo_desmontagem" value="{{ producao.checklist_de_acordo_desmontagem or '' }}">
+      </div>
+
+      <p style="font-size:12px;font-weight:600;color:var(--marrom-escuro);margin:16px 0 6px;">Na entrega (montagem)</p>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_pecas_plasticas_montagem" name="checklist_pecas_plasticas_montagem" {% if producao.checklist_pecas_plasticas_montagem %}checked{% endif %}>
+        <label for="checklist_pecas_plasticas_montagem" style="margin:0;">Peças plásticas originais conferidas</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_parte_eletrica_montagem" name="checklist_parte_eletrica_montagem" {% if producao.checklist_parte_eletrica_montagem %}checked{% endif %}>
+        <label for="checklist_parte_eletrica_montagem" style="margin:0;">Parte elétrica das laterais conferida</label>
+      </div>
+      <div class="checkbox-line">
+        <input type="checkbox" id="checklist_banco_laterais_montagem" name="checklist_banco_laterais_montagem" {% if producao.checklist_banco_laterais_montagem %}checked{% endif %}>
+        <label for="checklist_banco_laterais_montagem" style="margin:0;">Banco/laterais conferidos</label>
+      </div>
+      <div style="margin-top:8px;">
+        <label>De acordo (nome de quem assinou na entrega)</label>
+        <input type="text" name="checklist_de_acordo_montagem" value="{{ producao.checklist_de_acordo_montagem or '' }}">
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>Observações do checklist</label>
+        <textarea name="checklist_observacoes">{{ producao.checklist_observacoes or '' }}</textarea>
+      </div>
+    </fieldset>
+
     <div class="form-actions">
       <button class="btn" type="submit">Salvar produção</button>
+      <a class="btn btn-secondary" href="{{ url_for('imprimir_checklist', pedido_id=pedido.id) }}" target="_blank">Imprimir checklist</a>
       <a class="btn btn-secondary" href="{{ url_for('ver_pedido', pedido_id=pedido.id) }}">Voltar ao pedido</a>
     </div>
   </form>

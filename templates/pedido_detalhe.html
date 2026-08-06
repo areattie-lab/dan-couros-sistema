@@ -9,6 +9,7 @@
       </p>
     </div>
     <div style="display:flex;gap:8px;">
+      <a class="btn btn-secondary" href="{{ url_for('imprimir_checklist', pedido_id=pedido.id) }}" target="_blank">Imprimir checklist</a>
       <a class="btn btn-secondary" href="{{ url_for('editar_producao', pedido_id=pedido.id) }}">
         {{ "Ver produção" if pedido.producao else "Enviar para produção" }}
       </a>

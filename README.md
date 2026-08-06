@@ -11,10 +11,11 @@ Protótipo funcional cobrindo o núcleo do sistema descrito no documento: **Cada
 - Adicionais do pedido (Assoalho, 100% Couro, Misto, Sintético, Volante, Teto) como seleção múltipla, e Logomarca como Sim/Não — refletindo o formulário mais recente.
 - Lista de pedidos com abas: **Ativos** (visão inicial), **Finalizados/Cancelados**, **Todos**.
 - **Controle de Produção** (2ª linha do tempo, dentro do pedido): tela "Produção" no menu mostra a fila ordenada por prioridade, só com pedidos que ainda não terminaram. De cada pedido dá pra abrir o registro de produção com prioridade, responsável (costureira/terceirizado), datas de entrada/saída, etapa de costura, montagem, laterais, sinalização de ruga, metros de couro/sintético/espuma usados, e datas/motoristas de retirada e entrega do carro no cliente.
+- **Checklist de retirada/montagem**: botão "Imprimir checklist" no pedido gera o talão pronto para impressão (mesmo layout do papel: dados do veículo/cliente já preenchidos, conferência de peças plásticas/parte elétrica/banco-laterais na retirada e na entrega, linha para assinatura do cliente). Não precisa mais confeccionar esse talão à parte — os montadores também podem registrar a conferência digitalmente na tela de Produção, se quiserem.
 
 ## Fora do escopo desta v1 (próximos passos)
 
-Ainda não implementados: Checklist de retirada/montagem (o documento assinado pelo cliente), Recibo, Certificado, e os relatórios (forma de pagamento por período; comissionamento por cliente/período). O modelo de dados já foi pensado para esses módulos se conectarem ao Pedido sem duplicar cadastro.
+Ainda não implementados: Recibo, Certificado, e os relatórios (forma de pagamento por período; comissionamento por cliente/período). O modelo de dados já foi pensado para esses módulos se conectarem ao Pedido sem duplicar cadastro.
 
 ## Publicar na nuvem sem usar terminal (caminho recomendado)
 
@@ -66,6 +67,7 @@ Abra `http://localhost:5000`. Um banco SQLite (`dan_couros.db`) é criado automa
 - **Status de produção (OK/DISP)**: na planilha "Controle de Produção" a coluna STAT só tinha esses dois valores. Assumi "OK" = pronto e "DISP" = em aberto/pendente, e adicionei "Pendente" como estado inicial antes de qualquer um dos dois. Vale confirmar com o Victor se é isso mesmo ou se há mais estados.
 - **Etapas de costura (CAPA/MAQ)**: também vistas na planilha de produção, sem explicação do que significam exatamente. Coloquei como um select com "Capa", "Máquina" e "Concluído" — é um chute educado, precisa validar com quem realmente costura.
 - **Produção como 1 registro por pedido**: como o documento menciona que a produção pode levar mais de um dia, modelei como um único registro de produção por pedido (com data de entrada e saída), em vez de múltiplas linhas por dia. Se na prática cada pedido passa por várias etapas em dias diferentes com equipes diferentes, pode ser melhor um histórico de eventos em vez de um registro só — outro ponto para alinhar.
+- **Checklist ligado à Produção**: em vez de criar uma tela separada, coloquei os campos de conferência (peças plásticas, parte elétrica, banco/laterais, "de acordo") dentro do registro de Produção, já que datas e motoristas de retirada/entrega já estavam lá — evita perguntar a mesma coisa duas vezes. O talão impresso é só uma "visualização" desses dados no layout do papel original.
 
 ## Estrutura do projeto
 
