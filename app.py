@@ -1,7 +1,9 @@
 import os
+import logging
 from datetime import datetime, date
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from sqlalchemy import inspect, text
 
 from models import (
     db,
@@ -333,8 +335,35 @@ def imprimir_checklist(pedido_id):
     return render_template("checklist_print.html", pedido=pedido, producao=producao)
 
 
-with app.app_context():
+def sync_schema():
+    """Cria tabelas que faltam e adiciona colunas novas em tabelas que já existem.
+
+    db.create_all() sozinho só cria tabelas inteiramente novas — quando o app evolui
+    (ex: novos campos no Pedido/Produção) e a tabela já existe no banco, as colunas
+    novas ficam faltando e toda consulta que passa por elas quebra com erro 500.
+    Essa função fecha esse buraco automaticamente, sem precisar rodar SQL manual
+    ou ferramenta de migração à parte a cada atualização.
+    """
     db.create_all()
+    inspector = inspect(db.engine)
+    for table in db.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        colunas_existentes = {c["name"] for c in inspector.get_columns(table.name)}
+        for coluna in table.columns:
+            if coluna.name in colunas_existentes:
+                continue
+            tipo_sql = coluna.type.compile(dialect=db.engine.dialect)
+            try:
+                with db.engine.begin() as conn:
+                    conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{coluna.name}" {tipo_sql}'))
+                logging.warning("Coluna adicionada automaticamente: %s.%s", table.name, coluna.name)
+            except Exception:
+                logging.exception("Falha ao adicionar coluna %s.%s automaticamente", table.name, coluna.name)
+
+
+with app.app_context():
+    sync_schema()
 
 
 if __name__ == "__main__":

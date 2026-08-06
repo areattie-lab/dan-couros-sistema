@@ -55,6 +55,12 @@ python3 app.py
 
 Abra `http://localhost:5000`. Um banco SQLite (`dan_couros.db`) é criado automaticamente na primeira execução — nenhuma configuração extra é necessária para testar.
 
+## Sobre atualizações futuras (correção de bug importante)
+
+Numa atualização anterior, algumas telas pararam de funcionar (erro "Internal Server Error") depois de publicar o Checklist. Causa: o app só criava tabelas novas automaticamente, mas não adicionava colunas novas em tabelas que já existiam no banco — então os campos do checklist ficaram faltando na tabela de produção que já tinha sido criada antes.
+
+Corrigido: agora o app verifica sozinho, a cada início, se alguma coluna nova está faltando em alguma tabela e adiciona automaticamente. Você não precisa fazer nada de especial nas próximas atualizações — é só repetir o processo de sempre (subir os arquivos novos no GitHub, o Render redesploya, e o app se ajusta sozinho).
+
 ## Decisões que tomei e que valem alinhar com o Victor (Dan Couros)
 
 - **Status do pedido**: usei `Aberto → Em Produção → Desmontagem → Montagem → Finalizado`, com `Cancelado` como estado terminal à parte, e "Pago" como marcador independente (um pedido pode estar Finalizado e ainda não pago). O rascunho do quadro branco tinha mais anotações soltas (Em Aberto, Produção, Pago com símbolos riscados) que não deu para decifrar com certeza — vale confirmar esse fluxo com eles antes de avançar para o Controle de Produção.
